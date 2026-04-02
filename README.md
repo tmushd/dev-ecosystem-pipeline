@@ -106,6 +106,12 @@ Note: if `dbt test` prints "Nothing to do", it means no tests are defined in thi
 
 See `docs/SCREENSHOTS.md` for exactly what to capture and commit under `docs/screenshots/`.
 
+Deep dive docs:
+
+- `docs/PROJECT_WALKTHROUGH.md` (how everything connects)
+- `docs/GLOSSARY.md` (definitions of key terms)
+- `docs/INTERVIEW_PREP.md` (question bank + talking points)
+
 ## Screenshots
 
 Airflow DAG (end-to-end run):

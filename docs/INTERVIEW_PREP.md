@@ -2,6 +2,15 @@
 
 This is a short set of questions you can expect and the key points to hit.
 
+## How to Explain This Project (Simple, Confident)
+
+Use this 4-part structure:
+
+1. **Goal**: "I built an ELT pipeline that ingests live API data and produces analytics tables."
+2. **Architecture**: "APIs -> S3 -> Snowflake `COPY INTO` -> dbt -> Analytics."
+3. **Orchestration**: "Airflow runs parallel extracts, then one load, then dbt."
+4. **Proof**: "I validated outputs in Snowflake and captured screenshots/logs in the repo."
+
 ## Architecture and Design
 
 **Q: What problem does S3 solve here? Why not load straight into Snowflake?**
@@ -60,9 +69,34 @@ This is a short set of questions you can expect and the key points to hit.
 - Staging views per source.
 - A mart table `ANALYTICS.fct_ingestion_counts` that summarizes row counts per source.
 
+## Beginner / Intermediate / Advanced Question Bank
+
+Beginner:
+
+- What is the difference between ETL and ELT, and which one did you build?
+- What is an Airflow DAG and why do we use it?
+- What is S3 and what is an S3 "key"?
+- What is a Snowflake warehouse vs database vs schema?
+- What is dbt used for?
+
+Intermediate:
+
+- How do you handle API rate limits and retries? Where is it implemented?
+- Why did you store raw JSON in `VARIANT` instead of flattening immediately?
+- How does `COPY INTO` work, and what is an external stage?
+- How does Airflow pass a run date into tasks (`{{ ds }}`)? Why does partitioning matter?
+- How would you monitor and alert on failures (task logs, retries, SLAs)?
+
+Advanced:
+
+- How would you make the load step idempotent and safe to re-run?
+- How would you secure the S3 -> Snowflake connection (storage integration / IAM role) instead of static keys?
+- How would you scale Airflow beyond LocalExecutor (Celery/Kubernetes executor)? What changes?
+- How would you add data quality tests in dbt (schema.yml tests) and enforce them in CI?
+- How would you handle schema drift in upstream APIs over time?
+
 ## Practical Talking Points
 
 - Mention date partitioning in S3 (`YYYY-MM-DD`) and why it's helpful.
 - Mention observability: logs show S3 keys + `COPY INTO` statements.
 - Mention security: credentials come from env vars, no hardcoding.
-
