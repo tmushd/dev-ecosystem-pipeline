@@ -2,7 +2,7 @@
 
 End-to-end ELT pipeline that consolidates data from 3 live APIs (GitHub, CoinGecko, Hacker News) into Snowflake and transforms it with dbt.
 
-## What This Demonstrates (Recruiter-Friendly)
+## What This Demonstrates 
 
 - Orchestration with Airflow (parallel extracts -> load -> dbt)
 - Data lake landing zone on S3 (date-partitioned raw JSON)
