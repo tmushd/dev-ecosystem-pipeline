@@ -105,3 +105,29 @@ Note: if `dbt test` prints "Nothing to do", it means no tests are defined in thi
 ## Portfolio Assets
 
 See `docs/SCREENSHOTS.md` for exactly what to capture and commit under `docs/screenshots/`.
+
+## Screenshots
+
+Airflow DAG (end-to-end run):
+
+![Airflow DAG success](docs/screenshots/airflow_dag_graph_success.png)
+
+Airflow log proof (S3 upload):
+
+![Airflow S3 upload log](docs/screenshots/airflow_task_log_s3_upload.png)
+
+S3 landing zone layout:
+
+![S3 raw layout](docs/screenshots/s3_raw_layout.png)
+
+S3 date partitions (example source):
+
+![S3 github dates](docs/screenshots/s3_github_dates.png)
+
+Snowflake RAW counts:
+
+![Snowflake raw counts](docs/screenshots/snowflake_raw_counts.png)
+
+Snowflake analytics mart (dbt output):
+
+![Snowflake fct_ingestion_counts](docs/screenshots/snowflake_fct_ingestion_counts.png)

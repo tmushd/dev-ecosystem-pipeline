@@ -25,3 +25,7 @@ dbt_project/.user.yml
 dbt_project/target/
 dbt_project/dbt_packages/
 dbt_project/logs/
+
+# screenshots (only commit curated, renamed files)
+docs/images/
+docs/screenshots/Screenshot*.png
