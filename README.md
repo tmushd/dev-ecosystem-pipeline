@@ -10,7 +10,7 @@ End-to-end ELT pipeline that consolidates data from 3 live APIs (GitHub, CoinGec
 - Modeling with dbt (staging views + mart table)
 - Reproducible local environment via Docker Compose
 
-## Architecture (Target)
+## Architecture 
 
 APIs -> S3 (raw landing zone) -> Snowflake (COPY INTO) -> dbt -> Analytics
 
