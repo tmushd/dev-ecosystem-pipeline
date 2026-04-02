@@ -42,6 +42,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.airflow
+    hostname: airflow-webserver
     depends_on:
       postgres:
         condition: service_healthy
@@ -68,6 +69,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.airflow
+    # Important for "served logs": task instances record `hostname` when they run.
+    # If this is a random container id, the webserver can't resolve it. Using a stable
+    # hostname lets the webserver fetch logs from the scheduler's log server (8793).
+    hostname: airflow-scheduler
     depends_on:
       postgres:
         condition: service_healthy
