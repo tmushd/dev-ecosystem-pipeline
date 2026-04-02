@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: RAW
+    tables:
+      - name: raw_github_repos
+      - name: raw_coingecko_markets
+      - name: raw_coingecko_price_history
+      - name: raw_reddit_posts
+

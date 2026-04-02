@@ -1,0 +1,8 @@
+# Extra Python deps needed inside the Airflow container (Airflow itself is provided by the base image)
+requests==2.32.3
+tenacity==8.5.0
+python-dotenv==1.0.1
+
+boto3==1.35.88
+snowflake-connector-python==3.15.0
+dbt-snowflake==1.8.4
