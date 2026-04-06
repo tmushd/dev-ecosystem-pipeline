@@ -2,6 +2,19 @@
 
 End-to-end ELT pipeline that consolidates data from 3 live APIs (GitHub, CoinGecko, Hacker News) into Snowflake and transforms it with dbt.
 
+## At A Glance
+
+| Area | What this project does |
+| --- | --- |
+| Sources | GitHub, CoinGecko, and Hacker News live APIs |
+| Pipeline | Airflow extracts -> S3 raw landing -> Snowflake `COPY INTO` -> dbt models |
+| Cloud stack | Airflow, S3, Snowflake, dbt, Docker Compose |
+| Data shape | Date-partitioned raw JSON with warehouse staging and analytics layers |
+| Orchestration | Parallel API extraction with downstream load and transform steps |
+| Warehouse | Snowflake RAW and ANALYTICS schemas |
+| Modeling | dbt staging views plus mart-level ingestion analytics |
+| Deployment style | Reproducible local environment via Docker Compose |
+
 ## What This Demonstrates 
 
 - Orchestration with Airflow (parallel extracts -> load -> dbt)
