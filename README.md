@@ -1,6 +1,6 @@
 # dev-ecosystem-pipeline
 
-End-to-end ELT pipeline that consolidates data from 3 live APIs (GitHub, CoinGecko, Hacker News) into Snowflake and transforms it with dbt.
+End to end ELT pipeline that consolidates data from 3 live APIs (GitHub, CoinGecko, Hacker News) into Snowflake and transforms it with dbt.
 
 ## At A Glance
 
