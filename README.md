@@ -147,6 +147,6 @@ Snowflake RAW counts:
 
 ![Snowflake raw counts](docs/screenshots/snowflake_raw_counts.png)
 
-Sn analytics mart (dbt output):
+Sno analytics mart (dbt output):
 
 ![Snowflake fct_ingestion_counts](docs/screenshots/snowflake_fct_ingestion_counts.png)
