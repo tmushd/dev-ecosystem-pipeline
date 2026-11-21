@@ -1,8 +1,8 @@
 import logging
 import os
 
-from dotenv import load_dotenv
 import snowflake.connector
+from dotenv import load_dotenv
 
 
 def _required_env(name: str) -> str:
@@ -29,7 +29,7 @@ def main() -> None:
         "RAW.RAW_GITHUB_REPOS",
         "RAW.RAW_COINGECKO_MARKETS",
         "RAW.RAW_COINGECKO_PRICE_HISTORY",
-        "RAW.RAW_REDDIT_POSTS",
+        "RAW.RAW_HACKERNEWS_POSTS",
     ]
 
     with conn:

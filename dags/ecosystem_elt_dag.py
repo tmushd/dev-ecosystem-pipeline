@@ -1,7 +1,7 @@
 import logging
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from airflow import DAG
 from airflow.operators.bash import BashOperator
@@ -21,7 +21,7 @@ def _log_s3_landing_zone(run_date: str) -> None:
         logging.info("Landing raw API JSON in S3 run_date=%s (bucket/region will be read from env at runtime)", run_date)
 
 
-def _load_to_snowflake(run_date: str) -> None:
+def _load_to_snowflake(run_date: str, run_id: str) -> None:
     # scripts/ isn't on the default Airflow import path, so add it at runtime.
     dags_dir = os.path.dirname(__file__)
     scripts_dir = os.path.normpath(os.path.join(dags_dir, "..", "scripts"))
@@ -31,20 +31,27 @@ def _load_to_snowflake(run_date: str) -> None:
     from load_to_snowflake import load_run_date  # noqa: WPS433 (runtime import)
 
     _log_s3_landing_zone(run_date)
-    list(load_run_date(run_date=run_date))
+    list(load_run_date(run_date=run_date, run_id=run_id))
 
 
 with DAG(
     dag_id="dev_ecosystem_elt",
     start_date=datetime(2025, 1, 1),
-    schedule=None,
+    schedule="0 6 * * *",
     catchup=False,
+    max_active_runs=1,
+    default_args={
+        "owner": "data-platform",
+        "retries": 3,
+        "retry_delay": timedelta(minutes=5),
+        "execution_timeout": timedelta(minutes=45),
+    },
     tags=["portfolio", "api", "s3", "snowflake", "dbt"],
 ) as dag:
     extract_github = PythonOperator(
         task_id="extract_github",
         python_callable=extract_github_repos,
-        op_kwargs={"run_date": "{{ ds }}"},
+        op_kwargs={"run_date": "{{ ds }}", "run_id": "{{ run_id }}"},
     )
 
     extract_coingecko_task = PythonOperator(
@@ -62,7 +69,7 @@ with DAG(
     load_to_snowflake = PythonOperator(
         task_id="load_to_snowflake",
         python_callable=_load_to_snowflake,
-        op_kwargs={"run_date": "{{ ds }}"},
+        op_kwargs={"run_date": "{{ ds }}", "run_id": "{{ run_id }}"},
     )
 
     dbt_run_staging = BashOperator(

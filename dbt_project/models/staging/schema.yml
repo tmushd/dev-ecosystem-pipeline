@@ -1,0 +1,26 @@
+version: 2
+
+models:
+  - name: stg_github_repos
+    description: Typed, traceable GitHub repository snapshots.
+    columns:
+      - name: snapshot_key
+        data_tests: [not_null, unique]
+      - name: repo_id
+        data_tests: [not_null]
+      - name: snapshot_date
+        data_tests: [not_null]
+      - name: stars
+        data_tests: [not_null]
+      - name: forks
+        data_tests: [not_null]
+      - name: run_id
+        data_tests: [not_null]
+      - name: source_file
+        data_tests: [not_null]
+  - name: stg_hackernews_posts
+    columns:
+      - name: snapshot_key
+        data_tests: [not_null, unique]
+      - name: story_id
+        data_tests: [not_null]

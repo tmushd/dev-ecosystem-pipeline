@@ -1,0 +1,36 @@
+{
+  "hypothesis_a": {
+    "hypothesis": "Top-quartile starred repositories have a greater proportion of pushes within 30 days.",
+    "snapshot_date": "2026-11-21",
+    "star_cutoff": 7051.0,
+    "high_star": {
+      "n": 13,
+      "active": 11,
+      "rate": 0.8461538461538461,
+      "wilson_95_ci": [
+        0.5776482949136899,
+        0.9567427368172621
+      ]
+    },
+    "lower_star": {
+      "n": 37,
+      "active": 15,
+      "rate": 0.40540540540540543,
+      "wilson_95_ci": [
+        0.26346295839940137,
+        0.565143168686707
+      ]
+    },
+    "absolute_rate_difference": 0.4407484407484407,
+    "odds_ratio": 8.066666666666666,
+    "fisher_exact_p_value": 0.009182922272830156,
+    "interpretation_guardrail": "Observational association only; repository age, organization size, and selection criteria may confound the result."
+  },
+  "hypothesis_b": {
+    "hypothesis": "Recent star growth is associated with subsequent fork growth.",
+    "status": "INSUFFICIENT_HISTORY",
+    "available_snapshots": 1,
+    "required_snapshots": 14,
+    "reason": "Non-overlapping growth windows require longitudinal observations; no synthetic history is used."
+  }
+}

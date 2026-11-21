@@ -4,5 +4,5 @@ select 'coingecko_markets' as source_name, count(*) as row_count from {{ ref('st
 union all
 select 'coingecko_price_history' as source_name, count(*) as row_count from {{ ref('stg_coingecko_price_history') }}
 union all
-select 'reddit_posts' as source_name, count(*) as row_count from {{ ref('stg_reddit_posts') }}
+select 'hackernews_posts' as source_name, count(*) as row_count from {{ ref('stg_hackernews_posts') }}
 

@@ -1,6 +1,6 @@
 import logging
 import time
-from typing import Any, Dict, List
+from typing import Any
 
 import requests
 from tenacity import RetryError, retry, retry_if_exception_type, stop_after_attempt, wait_exponential
@@ -17,7 +17,7 @@ class _RetryableHTTPError(RuntimeError):
     wait=wait_exponential(multiplier=1, min=2, max=60),
     stop=stop_after_attempt(6),
 )
-def _get_json(url: str, params: Dict[str, Any]) -> Any:
+def _get_json(url: str, params: dict[str, Any]) -> Any:
     response = requests.get(
         url,
         params=params,
@@ -35,7 +35,7 @@ def _get_json(url: str, params: Dict[str, Any]) -> Any:
     return response.json()
 
 
-def extract_coingecko(*, run_date: str) -> List[str]:
+def extract_coingecko(*, run_date: str) -> list[str]:
     """
     Extract CoinGecko markets + price history and upload raw JSON to S3.
 
@@ -62,7 +62,7 @@ def extract_coingecko(*, run_date: str) -> List[str]:
     top_coin_ids = [c.get("id") for c in markets[:3] if c.get("id")]
     logging.info("Fetching CoinGecko price history for %d coins", len(top_coin_ids))
 
-    history_payload: List[Dict[str, Any]] = []
+    history_payload: list[dict[str, Any]] = []
     for coin_id in top_coin_ids:
         # CoinGecko free tier is rate-limited; space out calls proactively to avoid 429s.
         time.sleep(4.0)

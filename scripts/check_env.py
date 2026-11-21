@@ -34,6 +34,7 @@ def main() -> None:
             "SNOWFLAKE_PASSWORD",
             "SNOWFLAKE_DATABASE",
             "SNOWFLAKE_WAREHOUSE",
+            "SNOWFLAKE_STORAGE_INTEGRATION",
         ],
         "all": common
         + [
@@ -43,6 +44,7 @@ def main() -> None:
             "SNOWFLAKE_PASSWORD",
             "SNOWFLAKE_DATABASE",
             "SNOWFLAKE_WAREHOUSE",
+            "SNOWFLAKE_STORAGE_INTEGRATION",
         ],
     }
 

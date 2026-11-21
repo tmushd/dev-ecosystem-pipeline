@@ -9,7 +9,7 @@ dev_ecosystem:
       database: "{{ env_var('SNOWFLAKE_DATABASE') }}"
       warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE') }}"
       schema: ANALYTICS
-      role: "{{ env_var('SNOWFLAKE_ROLE', 'ACCOUNTADMIN') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE', 'DEV_ECOSYSTEM_ROLE') }}"
       threads: 4
       client_session_keep_alive: false
 

@@ -3,9 +3,15 @@ version: 2
 sources:
   - name: raw
     schema: RAW
+    freshness:
+      warn_after: {count: 36, period: hour}
+      error_after: {count: 72, period: hour}
+    loaded_at_field: ingested_at
     tables:
       - name: raw_github_repos
+        description: Replay-safe daily GitHub repository snapshots at repository/date grain.
       - name: raw_coingecko_markets
       - name: raw_coingecko_price_history
-      - name: raw_reddit_posts
+      - name: raw_hackernews_posts
+        description: Hacker News stories; correctly named replacement for the legacy Reddit-shaped table.
 

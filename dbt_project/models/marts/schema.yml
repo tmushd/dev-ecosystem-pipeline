@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: fct_repo_daily
+    description: One repository per snapshot date with documented activity and maintenance measures.
+    columns:
+      - name: snapshot_key
+        data_tests: [not_null, unique]
+      - name: repo_id
+        data_tests: [not_null]
+      - name: snapshot_date
+        data_tests: [not_null]
+      - name: is_recently_maintained_30d
+        data_tests:
+          - accepted_values:
+              values: [true, false]
+  - name: mart_repo_momentum
+    description: Decision-support ranking for repositories that warrant technical evaluation.
+    columns:
+      - name: snapshot_key
+        data_tests: [not_null, unique]
+      - name: maintenance_risk
+        data_tests:
+          - accepted_values:
+              values: ['ACTIVE', 'WATCH', 'HIGH']

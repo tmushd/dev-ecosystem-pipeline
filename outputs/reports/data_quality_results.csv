@@ -1,0 +1,9 @@
+check_name,status,failed_rows,details
+required_repo_id,PASS,0,repo_id must be populated
+required_snapshot_date,PASS,0,snapshot_date must be populated
+unique_repo_snapshot,PASS,0,repo_id + snapshot_date is the declared grain
+nonnegative_stars,PASS,0,stars must be nonnegative
+nonnegative_forks,PASS,0,forks must be nonnegative
+nonnegative_open_issues,PASS,0,open issues must be nonnegative
+valid_timestamps,PASS,0,created_at and last_push_at must parse
+valid_date_order,PASS,0,last_push_at cannot precede created_at

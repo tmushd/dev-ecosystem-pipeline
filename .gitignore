@@ -19,9 +19,13 @@ __pycache__/
 coverage/
 .coverage
 
+# generated local artifacts (representative evidence is intentionally committed)
+outputs/dashboard/*.tmp.html
+
 # dbt
 dbt_project/profiles.yml
 dbt_project/.user.yml
+**/.user.yml
 dbt_project/target/
 dbt_project/dbt_packages/
 dbt_project/logs/
