@@ -11,7 +11,7 @@ The system produces trusted repository-day facts and a current technology-evalua
 3. Snowflake uses an S3 storage integration. The loader merges all four objects inside one transaction using deterministic snapshot keys.
 4. dbt casts source variants into documented fields, applies schema/business tests, reconciles counts, and incrementally publishes `fct_repo_daily`.
 5. `mart_repo_momentum` calculates deltas, recency, transparent ranking, maintenance risk, and longitudinal-analysis readiness.
-6. SQL, Tableau-ready CSV, the interactive dashboard, and hypothesis report consume the same governed facts.
+6. SQL, the packaged Tableau executive dashboard, and the hypothesis report consume the same governed facts.
 
 ## Reliability semantics
 

@@ -12,7 +12,7 @@ Open the README diagram and explain:
 - S3 preserves replayable date partitions.
 - Snowflake merges deterministic repository/date snapshots atomically.
 - dbt freshness and `dbt build` publish tested facts and marts.
-- Python/SciPy and Plotly turn the facts into evidence and a decision interface.
+- Python/SciPy and Tableau turn the facts into evidence and an executive decision interface.
 
 ## 3. Show reliability evidence
 
