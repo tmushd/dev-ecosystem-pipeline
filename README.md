@@ -10,9 +10,9 @@
 ![Snowflake](https://img.shields.io/badge/Snowflake-Analytics-29B5E8?logo=snowflake&logoColor=white)
 ![dbt](https://img.shields.io/badge/dbt-22_data_tests-FF694B?logo=dbt&logoColor=white)
 
-**Airflow · Python · AWS S3 · Snowflake · dbt · SQL · Statistical Analysis · Plotly**
+**Airflow · Python · AWS S3 · Snowflake · dbt · SQL · Statistical Analysis · Tableau**
 
-[Explore the dashboard](outputs/dashboard/ecosystem_intelligence_dashboard.html) ·
+[Download the Tableau dashboard](outputs/dashboard/Open_Source_Ecosystem_Intelligence.twbx) ·
 [Read the findings](docs/ANALYTICAL_FINDINGS.md) ·
 [Inspect the run evidence](outputs/reports/latest_run_manifest.json) ·
 [View the decision mart](outputs/analytics/mart_repo_momentum.csv)
@@ -44,7 +44,7 @@ This is an observational result from a popularity-sorted search sample, not a ca
 | Replay acceptance test | **50 / 50 / 50 rows** |
 | Duplicate `repo_id + snapshot_date` keys | **0** |
 | Local data-quality gates | **10 / 10 passed** |
-| Python unit and contract tests | **11 passed** |
+| Python unit and contract tests | **13 passed** |
 | Declared dbt data tests | **22** |
 | High-star repositories active within 30 days | **84.6%** (11/13) |
 | Remaining repositories active within 30 days | **40.5%** (15/37) |
@@ -90,7 +90,7 @@ flowchart LR
         FACT[(fct_repo_daily)]
         MART[(mart_repo_momentum)]
         HYP[Hypothesis analysis]
-        DASH[Plotly dashboard<br/>+ Tableau-ready extract]
+        DASH[Packaged Tableau workbook<br/>+ embedded governed extract]
     end
 
     GH & HN & CG --> AF --> S3 --> MERGE --> RAW --> DBT --> FACT --> MART
@@ -123,7 +123,7 @@ flowchart LR
     F --> M[mart_repo_momentum]
     S1 & S2 & S3 --> C[fct_ingestion_counts]
     F --> A[Statistical analysis]
-    M --> D[Dashboard / Tableau extract]
+    M --> D[Tableau executive dashboard]
 ```
 
 | Data product | Grain | Decision value |
@@ -179,16 +179,19 @@ This test requires non-overlapping longitudinal windows. The platform calculates
 
 ## Dashboard and stakeholder outputs
 
-The repository contains an interactive **Plotly** dashboard with two views:
+The repository contains a self-contained [**Tableau packaged workbook**](outputs/dashboard/Open_Source_Ecosystem_Intelligence.twbx). Its embedded governed extract means a reviewer can open it without AWS, Snowflake, or local-path setup.
 
-1. **Data Reliability** — current rows, validation status, replay variance, and duplicate keys.
-2. **Ecosystem Analytics** — popularity versus maintenance recency with repository-level drill-down.
+1. **Repository Landscape** — stars versus days since last push, with fork count by size and maintenance risk by color.
+2. **Evaluation Ranking** — repository-level evaluation scores for technical-evaluation triage.
+3. **Maintenance Risk** — portfolio composition across `ACTIVE`, `WATCH`, and `HIGH` risk tiers.
+4. **Executive Overview** — a 1400 × 900 dashboard composing all three decision views.
 
-It also publishes a [Tableau-ready CSV extract](outputs/analytics/tableau_repo_momentum_extract.csv). A native Tableau workbook is a planned presentation layer and is not claimed as completed.
+The editable [workbook source](tableau/Open_Source_Ecosystem_Intelligence.twb), packaged workbook, and [Tableau data extract](outputs/analytics/tableau_repo_momentum_extract.csv) are rebuilt together by the evidence pipeline. Automated gates validate the package contents, XML, data connection, worksheets, dashboard, and ZIP integrity.
 
 | Reviewer artifact | What it proves |
 | --- | --- |
-| [Interactive dashboard](outputs/dashboard/ecosystem_intelligence_dashboard.html) | Stakeholder-facing exploration |
+| [Tableau packaged workbook](outputs/dashboard/Open_Source_Ecosystem_Intelligence.twbx) | Self-contained stakeholder-facing decision dashboard |
+| [Tableau workbook source](tableau/Open_Source_Ecosystem_Intelligence.twb) | Reviewable and reproducible BI implementation |
 | [Decision mart](outputs/analytics/mart_repo_momentum.csv) | Ranked repository-level analytical output |
 | [Hypothesis results](outputs/reports/hypothesis_results.json) | Effect sizes, uncertainty, sensitivity, and readiness gate |
 | [Data-quality results](outputs/reports/data_quality_results.csv) | Rule-by-rule validation evidence |
@@ -204,10 +207,10 @@ This table makes the project's proof level explicit:
 | --- | --- | --- |
 | Live public GitHub collection | **Verified locally** | Committed raw snapshot and SHA-256 manifest |
 | Three replay idempotency test | **Verified locally** | 50/50/50 counts and zero duplicate keys |
-| Python contracts and analytics | **Verified in CI** | 11 automated tests and release gates |
+| Python contracts and analytics | **Verified in CI** | 13 automated tests and release gates |
 | dbt project structure | **Parsed and tested statically** | 7 models and 22 declared data tests |
 | Snowflake transactional merge | **Implemented and unit-tested** | SQL construction/security tests; live replay proof still pending |
-| Native Tableau workbook | **Not yet implemented** | Plotly dashboard and Tableau-ready extract are available |
+| Native Tableau workbook | **Implemented and package-validated** | `.twb`, embedded CSV, three worksheets, and executive `.twbx` dashboard |
 
 ## Technology choices
 
@@ -219,7 +222,7 @@ This table makes the project's proof level explicit:
 | Warehouse | Snowflake | Transactional merge, semi-structured ingestion, governed analytics |
 | Transformation | dbt + SQL | Typed models, lineage, freshness, tests, incremental facts |
 | Analysis | pandas + SciPy | Reproducible effect sizes, intervals, and hypothesis tests |
-| Visualization | Plotly + Tableau-ready CSV | Interactive review now; portable BI handoff |
+| Visualization | Tableau packaged workbook | Recruiter-ready executive BI artifact with an embedded governed extract |
 | Delivery | GitHub Actions | Lint, tests, dbt parse, and evidence release gates |
 
 ## Reproduce the verified evidence
@@ -260,6 +263,7 @@ make verify
 │   └── tests/                         # business rules and count reconciliation
 ├── scripts/load_to_snowflake.py       # atomic integration-backed MERGE loader
 ├── scripts/build_portfolio_evidence.py# credential-free reproducible evidence
+├── tableau/                            # editable Tableau workbook source and usage guide
 ├── tests/                              # clean/corrupt fixtures, replay, DAG, security, statistics
 ├── outputs/                            # committed recruiter-verifiable results
 └── docs/                               # findings, architecture, metrics, and operations
@@ -270,4 +274,4 @@ make verify
 - Engineered a daily analytics platform across Airflow, S3, Snowflake, and dbt with transactional `MERGE` loading, dependency-aware builds, 22 warehouse tests, and replay-safe repository/day modeling; verified three identical local replays with zero duplicate keys and 10/10 quality gates passing.
 - Analyzed 50 live open-source repositories using effect sizes, Wilson intervals, Fisher's exact testing, activity-window sensitivity, and age context; identified a **44.1-point difference** in recent-maintenance rates for top-quartile starred projects (`p=0.0092`) and translated the result into a technical-evaluation workflow.
 
-These claims are tied to committed artifacts and deliberately exclude unmeasured revenue, time savings, causal impact, live Snowflake replay proof, or a native Tableau workbook.
+These claims are tied to committed artifacts and deliberately exclude unmeasured revenue, time savings, causal impact, live Snowflake replay proof, or a hosted Tableau Public deployment. The packaged Tableau workbook is generated and structurally validated in CI; final visual rendering requires Tableau Desktop or Tableau Public.

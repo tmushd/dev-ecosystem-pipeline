@@ -40,7 +40,7 @@ The merge and security logic are implemented, statically validated, and unit-tes
 
 ### Is this a Tableau project?
 
-It currently includes an interactive Plotly dashboard and a Tableau-ready CSV. A native Tableau workbook is not claimed as completed.
+It includes a native Tableau workbook and self-contained packaged dashboard with an embedded governed CSV. The package is structurally validated in CI; a hosted Tableau Public deployment is not claimed.
 
 ## Strong closing point
 

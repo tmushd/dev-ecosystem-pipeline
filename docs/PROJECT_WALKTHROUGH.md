@@ -13,7 +13,7 @@ The platform helps a technology-evaluation team identify open-source data-engine
 5. `dbt source freshness` verifies the inputs.
 6. `dbt build` creates typed staging views, the incremental repository-day fact, the current momentum mart, and all tests in dependency order.
 7. Python/SciPy calculate the documented hypothesis results from the same repository-day grain.
-8. Plotly and the Tableau-ready extract expose reliability and ecosystem analytics to stakeholders.
+8. A packaged Tableau workbook exposes repository landscape, evaluation ranking, and maintenance risk to stakeholders using an embedded governed extract.
 
 ## Important implementation files
 
@@ -46,7 +46,7 @@ The star-growth/future-fork-growth analysis is gated until 14 daily snapshots ex
 
 ## Evidence boundary
 
-Local collection, replay behavior, quality checks, Python tests, dbt parsing, results, and dashboard artifacts are verified and committed. Snowflake `MERGE` is implemented and unit-tested, but three live Snowflake replays are not claimed. The repository includes a Plotly dashboard and Tableau-ready extract, not a native Tableau workbook.
+Local collection, replay behavior, quality checks, Python tests, dbt parsing, results, and Tableau package structure are verified and committed. Snowflake `MERGE` is implemented and unit-tested, but three live Snowflake replays are not claimed. The repository includes a native Tableau workbook and self-contained `.twbx`; hosted Tableau Public deployment and local visual rendering are not claimed.
 
 ## Run locally
 
