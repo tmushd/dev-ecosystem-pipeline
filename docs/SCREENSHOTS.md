@@ -13,7 +13,7 @@ These screenshots make the project "real" to a recruiter. Save them under `docs/
   - `dbt_run_staging`
   - `dbt_test`
   - `dbt_run_marts`
-- (Optional) Task log snippet showing an S3 key being written and a `COPY INTO` statement
+- (Optional) Task log snippet showing an S3 key and the transactional `MERGE` load
 
 Suggested filenames:
 

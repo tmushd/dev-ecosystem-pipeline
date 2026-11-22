@@ -28,6 +28,7 @@ SNAPSHOT_COLUMNS = [
     "stars",
     "forks",
     "open_issues",
+    "open_issues_collection_status",
     "created_at",
     "last_push_at",
     "archived",
@@ -54,6 +55,12 @@ def normalize_repository(
     repo: dict[str, Any], *, snapshot_date: str, run_id: str, source_file: str
 ) -> dict[str, Any]:
     owner = repo.get("owner") or {}
+
+    def optional_count(key: str) -> int | None:
+        value = repo.get(key)
+        return int(value) if value is not None else None
+
+    open_issues = optional_count("open_issues_count")
     return {
         "repo_id": int(repo["id"]),
         "repo_full_name": str(repo["full_name"]),
@@ -61,9 +68,11 @@ def normalize_repository(
         "repo_name": str(repo.get("name") or repo["full_name"].split("/", 1)[1]),
         "html_url": str(repo.get("html_url") or f"https://github.com/{repo['full_name']}"),
         "description": repo.get("description"),
-        "stars": int(repo.get("stargazers_count") or 0),
-        "forks": int(repo.get("forks_count") or 0),
-        "open_issues": int(repo.get("open_issues_count") or 0),
+        "stars": optional_count("stargazers_count"),
+        "forks": optional_count("forks_count"),
+        "open_issues": open_issues,
+        "open_issues_collection_status": repo.get("open_issues_collection_status")
+        or ("api_reported" if open_issues is not None else "unavailable"),
         "created_at": repo.get("created_at"),
         "last_push_at": repo.get("pushed_at") or repo.get("updated_at"),
         "archived": bool(repo.get("archived", False)),
@@ -93,9 +102,15 @@ def validate_snapshot(frame: pd.DataFrame) -> pd.DataFrame:
     add("required_snapshot_date", frame["snapshot_date"].isna(), "snapshot_date must be populated")
     duplicate_mask = frame.duplicated(["repo_id", "snapshot_date"], keep=False)
     add("unique_repo_snapshot", duplicate_mask, "repo_id + snapshot_date is the declared grain")
-    add("nonnegative_stars", frame["stars"] < 0, "stars must be nonnegative")
-    add("nonnegative_forks", frame["forks"] < 0, "forks must be nonnegative")
-    add("nonnegative_open_issues", frame["open_issues"] < 0, "open issues must be nonnegative")
+    add("required_stars", frame["stars"].isna(), "stars must be observed; missing is not zero")
+    add("required_forks", frame["forks"].isna(), "forks must be observed; missing is not zero")
+    add("nonnegative_stars", frame["stars"].notna() & (frame["stars"] < 0), "stars must be nonnegative")
+    add("nonnegative_forks", frame["forks"].notna() & (frame["forks"] < 0), "forks must be nonnegative")
+    add(
+        "nonnegative_open_issues",
+        frame["open_issues"].notna() & (frame["open_issues"] < 0),
+        "observed open issues must be nonnegative; unavailable values remain null",
+    )
     created = pd.to_datetime(frame["created_at"], utc=True, errors="coerce")
     pushed = pd.to_datetime(frame["last_push_at"], utc=True, errors="coerce")
     add("valid_timestamps", created.isna() | pushed.isna(), "created_at and last_push_at must parse")
@@ -164,6 +179,42 @@ def analyze_maintenance_hypothesis(repo_daily: pd.DataFrame) -> dict[str, Any]:
     )
     high_rate = high_active / len(high) if len(high) else float("nan")
     low_rate = low_active / len(low) if len(low) else float("nan")
+    sensitivity = []
+    for activity_days in [14, 30, 60, 90]:
+        high_count = int((high["days_since_last_push"] <= activity_days).sum())
+        low_count = int((low["days_since_last_push"] <= activity_days).sum())
+        sensitivity_odds, sensitivity_p = fisher_exact(
+            [[high_count, len(high) - high_count], [low_count, len(low) - low_count]], alternative="two-sided"
+        )
+        sensitivity.append(
+            {
+                "activity_window_days": activity_days,
+                "high_star_rate": high_count / len(high),
+                "lower_star_rate": low_count / len(low),
+                "absolute_rate_difference": high_count / len(high) - low_count / len(low),
+                "odds_ratio": float(sensitivity_odds),
+                "fisher_exact_p_value": float(sensitivity_p),
+            }
+        )
+
+    age_labels = ["youngest", "mid_young", "mid_mature", "oldest"]
+    age_percentile = latest["repo_age_days"].rank(method="average", pct=True)
+    latest["age_group"] = pd.cut(
+        age_percentile,
+        bins=[0.0, 0.25, 0.50, 0.75, 1.0],
+        labels=age_labels,
+        include_lowest=True,
+    )
+    age_context = [
+        {
+            "age_group": str(group),
+            "n": len(part),
+            "median_age_days": float(part["repo_age_days"].median()),
+            "recent_maintenance_rate_30d": float(part["is_recently_maintained_30d"].mean()),
+        }
+        for group, part in latest.groupby("age_group", observed=True)
+    ]
+
     return {
         "hypothesis": "Top-quartile starred repositories have a greater proportion of pushes within 30 days.",
         "snapshot_date": str(latest_date),
@@ -173,6 +224,8 @@ def analyze_maintenance_hypothesis(repo_daily: pd.DataFrame) -> dict[str, Any]:
         "absolute_rate_difference": float(high_rate - low_rate),
         "odds_ratio": float(odds_ratio),
         "fisher_exact_p_value": float(p_value),
+        "activity_window_sensitivity": sensitivity,
+        "repository_age_context": age_context,
         "interpretation_guardrail": "Observational association only; repository age, organization size, and selection criteria may confound the result.",
     }
 
@@ -188,9 +241,9 @@ def assess_growth_hypothesis_readiness(repo_daily: pd.DataFrame, minimum_snapsho
     }
 
 
-def _extract_number(html: str, key: str) -> int:
+def _extract_number(html: str, key: str) -> int | None:
     match = re.search(rf'"{re.escape(key)}":(\d+)', html)
-    return int(match.group(1)) if match else 0
+    return int(match.group(1)) if match else None
 
 
 def _extract_string(html: str, key: str) -> str | None:
@@ -208,12 +261,12 @@ def _latest_commit_at(session: requests.Session, full_name: str, default_branch:
     return updated.text if updated is not None else None
 
 
-def _open_issue_count(session: requests.Session, full_name: str) -> int:
+def _open_issue_count(session: requests.Session, full_name: str) -> tuple[int | None, str]:
     response = session.get(f"https://github.com/{full_name}/issues?q=is%3Aissue+is%3Aopen", timeout=30)
     if response.status_code != 200:
-        return 0
+        return None, f"http_{response.status_code}"
     match = re.search(r'data-content="Issues".{0,300}CounterLabel[^>]*>([\d,]+)</span>', response.text, re.DOTALL)
-    return int(match.group(1).replace(",", "")) if match else 0
+    return (int(match.group(1).replace(",", "")), "observed") if match else (None, "not_exposed")
 
 
 def collect_public_github_snapshot(*, pages: int = 5, snapshot_date: str | None = None) -> list[dict[str, Any]]:
@@ -245,6 +298,7 @@ def collect_public_github_snapshot(*, pages: int = 5, snapshot_date: str | None 
         default_branch = _extract_string(html, "defaultBranch") or "main"
         owner, name = full_name.split("/", 1)
         description_tag = BeautifulSoup(html, "html.parser").find("meta", {"name": "description"})
+        open_issues, open_issues_status = _open_issue_count(session, full_name)
         records.append(
             {
                 "id": int(repo_id_match.group(1)) if repo_id_match else int(hashlib.sha256(full_name.encode()).hexdigest()[:12], 16),
@@ -255,7 +309,8 @@ def collect_public_github_snapshot(*, pages: int = 5, snapshot_date: str | None 
                 "description": description_tag.get("content") if description_tag else None,
                 "stargazers_count": _extract_number(html, "stargazerCount"),
                 "forks_count": _extract_number(html, "forksCount"),
-                "open_issues_count": _open_issue_count(session, full_name),
+                "open_issues_count": open_issues,
+                "open_issues_collection_status": open_issues_status,
                 "created_at": _extract_string(html, "createdAt"),
                 "pushed_at": _latest_commit_at(session, full_name, default_branch),
                 "archived": '"isArchived":true' in html,

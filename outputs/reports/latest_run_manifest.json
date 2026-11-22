@@ -1,13 +1,13 @@
 {
-  "run_id": "github-2026-11-21-5197b4dce43e",
+  "run_id": "github-2026-11-21-077e66117c0a",
   "status": "SUCCESS",
-  "started_at": "2026-11-21T23:37:51.915682+00:00",
-  "completed_at": "2026-11-21T23:38:52.041994+00:00",
-  "duration_seconds": 60.125,
+  "started_at": "2026-11-22T00:13:55.983620+00:00",
+  "completed_at": "2026-11-22T00:14:57.479717+00:00",
+  "duration_seconds": 61.495,
   "snapshot_date": "2026-11-21",
   "source_query": "topic:data-engineering language:Python sort:stars-desc",
   "source_file": "data/raw/github/2026-11-21/repos.json",
-  "source_sha256": "ac70f11ececb2dd891452c911640d336c09a7762bfe97252e2036031b96f5c47",
+  "source_sha256": "13b49a5ce1d58673eee0c65ce7a81719400f9e15f0adcd26dafb31836224a2ac",
   "source_records": 50,
   "curated_rows": 50,
   "current_snapshot_rows": 50,
@@ -18,8 +18,11 @@
     50
   ],
   "duplicate_snapshot_keys": 0,
-  "quality_checks_passed": 8,
-  "quality_checks_total": 8,
+  "quality_checks_passed": 10,
+  "quality_checks_total": 10,
+  "open_issue_counts_observed": 25,
+  "open_issue_count_coverage": 0.5,
+  "missing_issue_counts_preserved_as_null": 25,
   "hypothesis_a": {
     "hypothesis": "Top-quartile starred repositories have a greater proportion of pushes within 30 days.",
     "snapshot_date": "2026-11-21",
@@ -45,6 +48,66 @@
     "absolute_rate_difference": 0.4407484407484407,
     "odds_ratio": 8.066666666666666,
     "fisher_exact_p_value": 0.009182922272830156,
+    "activity_window_sensitivity": [
+      {
+        "activity_window_days": 14,
+        "high_star_rate": 0.8461538461538461,
+        "lower_star_rate": 0.3783783783783784,
+        "absolute_rate_difference": 0.46777546777546775,
+        "odds_ratio": 9.035714285714286,
+        "fisher_exact_p_value": 0.008298628462862199
+      },
+      {
+        "activity_window_days": 30,
+        "high_star_rate": 0.8461538461538461,
+        "lower_star_rate": 0.40540540540540543,
+        "absolute_rate_difference": 0.4407484407484407,
+        "odds_ratio": 8.066666666666666,
+        "fisher_exact_p_value": 0.009182922272830156
+      },
+      {
+        "activity_window_days": 60,
+        "high_star_rate": 0.9230769230769231,
+        "lower_star_rate": 0.4594594594594595,
+        "absolute_rate_difference": 0.46361746361746364,
+        "odds_ratio": 14.117647058823529,
+        "fisher_exact_p_value": 0.0036904886211818777
+      },
+      {
+        "activity_window_days": 90,
+        "high_star_rate": 0.9230769230769231,
+        "lower_star_rate": 0.5405405405405406,
+        "absolute_rate_difference": 0.38253638253638256,
+        "odds_ratio": 10.2,
+        "fisher_exact_p_value": 0.01801678852644274
+      }
+    ],
+    "repository_age_context": [
+      {
+        "age_group": "youngest",
+        "n": 12,
+        "median_age_days": 920.4993460648147,
+        "recent_maintenance_rate_30d": 0.5833333333333334
+      },
+      {
+        "age_group": "mid_young",
+        "n": 13,
+        "median_age_days": 1736.3362847222222,
+        "recent_maintenance_rate_30d": 0.46153846153846156
+      },
+      {
+        "age_group": "mid_mature",
+        "n": 12,
+        "median_age_days": 2351.858321759259,
+        "recent_maintenance_rate_30d": 0.3333333333333333
+      },
+      {
+        "age_group": "oldest",
+        "n": 13,
+        "median_age_days": 3183.0530902777778,
+        "recent_maintenance_rate_30d": 0.6923076923076923
+      }
+    ],
     "interpretation_guardrail": "Observational association only; repository age, organization size, and selection criteria may confound the result."
   },
   "hypothesis_b": {

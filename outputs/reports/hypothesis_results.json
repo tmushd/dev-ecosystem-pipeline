@@ -24,6 +24,66 @@
     "absolute_rate_difference": 0.4407484407484407,
     "odds_ratio": 8.066666666666666,
     "fisher_exact_p_value": 0.009182922272830156,
+    "activity_window_sensitivity": [
+      {
+        "activity_window_days": 14,
+        "high_star_rate": 0.8461538461538461,
+        "lower_star_rate": 0.3783783783783784,
+        "absolute_rate_difference": 0.46777546777546775,
+        "odds_ratio": 9.035714285714286,
+        "fisher_exact_p_value": 0.008298628462862199
+      },
+      {
+        "activity_window_days": 30,
+        "high_star_rate": 0.8461538461538461,
+        "lower_star_rate": 0.40540540540540543,
+        "absolute_rate_difference": 0.4407484407484407,
+        "odds_ratio": 8.066666666666666,
+        "fisher_exact_p_value": 0.009182922272830156
+      },
+      {
+        "activity_window_days": 60,
+        "high_star_rate": 0.9230769230769231,
+        "lower_star_rate": 0.4594594594594595,
+        "absolute_rate_difference": 0.46361746361746364,
+        "odds_ratio": 14.117647058823529,
+        "fisher_exact_p_value": 0.0036904886211818777
+      },
+      {
+        "activity_window_days": 90,
+        "high_star_rate": 0.9230769230769231,
+        "lower_star_rate": 0.5405405405405406,
+        "absolute_rate_difference": 0.38253638253638256,
+        "odds_ratio": 10.2,
+        "fisher_exact_p_value": 0.01801678852644274
+      }
+    ],
+    "repository_age_context": [
+      {
+        "age_group": "youngest",
+        "n": 12,
+        "median_age_days": 920.4993460648147,
+        "recent_maintenance_rate_30d": 0.5833333333333334
+      },
+      {
+        "age_group": "mid_young",
+        "n": 13,
+        "median_age_days": 1736.3362847222222,
+        "recent_maintenance_rate_30d": 0.46153846153846156
+      },
+      {
+        "age_group": "mid_mature",
+        "n": 12,
+        "median_age_days": 2351.858321759259,
+        "recent_maintenance_rate_30d": 0.3333333333333333
+      },
+      {
+        "age_group": "oldest",
+        "n": 13,
+        "median_age_days": 3183.0530902777778,
+        "recent_maintenance_rate_30d": 0.6923076923076923
+      }
+    ],
     "interpretation_guardrail": "Observational association only; repository age, organization size, and selection criteria may confound the result."
   },
   "hypothesis_b": {

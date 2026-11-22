@@ -19,6 +19,9 @@ def main() -> None:
     assert (dq["status"] == "PASS").all()
     mart = pd.read_csv(ROOT / "outputs/analytics/mart_repo_momentum.csv")
     assert (mart["open_issues"] > 0).any(), "evidence must include observable issue counts"
+    unavailable = mart["open_issues_collection_status"] != "observed"
+    assert mart.loc[unavailable, "open_issues"].isna().all(), "unavailable issue counts must remain null"
+    assert manifest["missing_issue_counts_preserved_as_null"] == int(mart["open_issues"].isna().sum())
     assert (ROOT / "outputs/dashboard/ecosystem_intelligence_dashboard.html").stat().st_size > 10_000
     print("Release gates passed:", json.dumps(manifest, indent=2, default=str))
 

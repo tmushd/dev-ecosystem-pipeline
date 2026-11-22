@@ -72,26 +72,18 @@ with DAG(
         op_kwargs={"run_date": "{{ ds }}", "run_id": "{{ run_id }}"},
     )
 
-    dbt_run_staging = BashOperator(
-        task_id="dbt_run_staging",
-        bash_command="cd /opt/airflow/dbt_project && dbt run --select path:models/staging",
+    dbt_source_freshness = BashOperator(
+        task_id="dbt_source_freshness",
+        bash_command="cd /opt/airflow/dbt_project && dbt source freshness",
         env={"DBT_PROFILES_DIR": "/opt/airflow/dbt_project"},
         append_env=True,
     )
 
-    dbt_test = BashOperator(
-        task_id="dbt_test",
-        bash_command="cd /opt/airflow/dbt_project && dbt test",
+    dbt_build = BashOperator(
+        task_id="dbt_build",
+        bash_command="cd /opt/airflow/dbt_project && dbt build",
         env={"DBT_PROFILES_DIR": "/opt/airflow/dbt_project"},
         append_env=True,
     )
 
-    dbt_run_marts = BashOperator(
-        task_id="dbt_run_marts",
-        bash_command="cd /opt/airflow/dbt_project && dbt run --select path:models/marts",
-        env={"DBT_PROFILES_DIR": "/opt/airflow/dbt_project"},
-        append_env=True,
-    )
-
-    # Keep the same dependency shape: extract tasks run in parallel, feed into load, then dbt.
-    [extract_github, extract_coingecko_task, extract_hackernews] >> load_to_snowflake >> dbt_run_staging >> dbt_test >> dbt_run_marts
+    [extract_github, extract_coingecko_task, extract_hackernews] >> load_to_snowflake >> dbt_source_freshness >> dbt_build

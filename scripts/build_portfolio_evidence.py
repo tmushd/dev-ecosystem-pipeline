@@ -145,6 +145,9 @@ def main() -> None:
         "duplicate_snapshot_keys": int(thrice.duplicated(["repo_id", "snapshot_date"]).sum()),
         "quality_checks_passed": int((dq["status"] == "PASS").sum()),
         "quality_checks_total": len(dq),
+        "open_issue_counts_observed": int(latest["open_issues"].notna().sum()),
+        "open_issue_count_coverage": float(latest["open_issues"].notna().mean()),
+        "missing_issue_counts_preserved_as_null": int(latest["open_issues"].isna().sum()),
         "hypothesis_a": hypothesis_a,
         "hypothesis_b": hypothesis_b,
     }

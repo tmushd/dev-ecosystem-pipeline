@@ -24,6 +24,32 @@ Within this selected ecosystem snapshot, highly starred repositories were much m
 
 The result is not causal. Organization capacity, repository age, product maturity, mirrored activity, release practices, and GitHub search ranking can affect both stars and activity. A commit is also an imperfect proxy for healthy maintenance.
 
+### Activity-window sensitivity
+
+| Definition of recent maintenance | High-star rate | Other rate | Absolute difference | Fisher p-value |
+| ---: | ---: | ---: | ---: | ---: |
+| 14 days | 84.6% | 37.8% | +46.8 points | 0.0083 |
+| 30 days | 84.6% | 40.5% | +44.1 points | 0.0092 |
+| 60 days | 92.3% | 45.9% | +46.4 points | 0.0037 |
+| 90 days | 92.3% | 54.1% | +38.3 points | 0.0180 |
+
+The direction remains stable across all four definitions. This reduces dependence on the specific 30-day policy threshold, but it does not remove sampling or confounding concerns.
+
+### Repository-age context
+
+| Age quartile | n | Median age | Recent-maintenance rate |
+| --- | ---: | ---: | ---: |
+| Youngest | 12 | 920 days | 58.3% |
+| Mid-young | 13 | 1,736 days | 46.2% |
+| Mid-mature | 12 | 2,352 days | 33.3% |
+| Oldest | 13 | 3,183 days | 69.2% |
+
+Activity does not decline monotonically with repository age in this sample; the oldest quartile is highly active. That pattern reinforces why age should be treated as context rather than assuming older repositories are less maintained.
+
+## Missing-data note
+
+Open-issue counts were observable for 25 of 50 repositories. The other 25 are stored as null with an explicit collection status rather than being converted to zero. Issue-burden comparisons should therefore be restricted to observed rows and treated as secondary in this snapshot.
+
 ## Hypothesis B: star growth and subsequent fork growth
 
 Status: **INSUFFICIENT_HISTORY**. Only one daily snapshot is available, while the predeclared minimum is 14. The analysis requires a star-growth window that precedes a separate fork-growth window. Running it now would reuse the same period or invent history, so the pipeline blocks the test and publishes its readiness state.
