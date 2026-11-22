@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import requests
 from tenacity import RetryError, retry, retry_if_exception_type, stop_after_attempt, wait_exponential
@@ -34,7 +34,7 @@ def _get_json(url: str) -> Any:
     return response.json()
 
 
-def _hn_item_to_post(item: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+def _hn_item_to_post(item: dict[str, Any]) -> dict[str, Any] | None:
     # We only keep "story" items; HN includes comments/jobs/polls/etc.
     if item.get("type") != "story":
         return None
@@ -66,10 +66,10 @@ def extract_hackernews_posts(*, run_date: str, limit: int = 100) -> str:
     S3 key: raw/hackernews/{YYYY-MM-DD}/posts.json
     """
     # Firebase-backed endpoints (official HN API).
-    top_ids: List[int] = _get_json("https://hacker-news.firebaseio.com/v0/topstories.json")
+    top_ids: list[int] = _get_json("https://hacker-news.firebaseio.com/v0/topstories.json")
     top_ids = top_ids[:limit]
 
-    posts: List[Dict[str, Any]] = []
+    posts: list[dict[str, Any]] = []
     for item_id in top_ids:
         try:
             item = _get_json(f"https://hacker-news.firebaseio.com/v0/item/{item_id}.json")

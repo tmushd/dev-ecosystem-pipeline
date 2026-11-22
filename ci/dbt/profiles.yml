@@ -1,0 +1,13 @@
+dev_ecosystem:
+  target: ci
+  outputs:
+    ci:
+      type: snowflake
+      account: dummy-account
+      user: dummy-user
+      password: dummy-password
+      database: DEV_ECOSYSTEM
+      warehouse: DEV_ECOSYSTEM_WH
+      schema: ANALYTICS
+      role: DEV_ECOSYSTEM_ROLE
+      threads: 1
