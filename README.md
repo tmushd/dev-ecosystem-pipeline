@@ -1,136 +1,273 @@
+<div align="center">
+
 # Open-Source Ecosystem Intelligence Platform
 
-An end-to-end analytics engineering project that converts live GitHub repository telemetry into reliable daily snapshots, tested analytical models, statistical evidence, and a decision-support ranking for technology evaluation teams.
+### From live GitHub telemetry to reliable technology-evaluation decisions
 
-The platform answers a practical question: **which open-source data engineering projects are both important and actively maintained enough to warrant deeper technical evaluation?** It combines Airflow, Python, S3, Snowflake, dbt, SQL, statistics, and an interactive dashboard. CoinGecko remains a separately modeled source, while Hacker News provides a correctly named supplemental community feed; GitHub is the coherent analytical domain.
+[![Analytics quality gates](https://github.com/tmushd/dev-ecosystem-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/tmushd/dev-ecosystem-pipeline/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
+![Airflow](https://img.shields.io/badge/Airflow-2.10-017CEE?logo=apacheairflow&logoColor=white)
+![Snowflake](https://img.shields.io/badge/Snowflake-Analytics-29B5E8?logo=snowflake&logoColor=white)
+![dbt](https://img.shields.io/badge/dbt-22_data_tests-FF694B?logo=dbt&logoColor=white)
 
-## Verified results
+**Airflow · Python · AWS S3 · Snowflake · dbt · SQL · Statistical Analysis · Plotly**
 
-The committed evidence run uses **50 live public GitHub repositories** collected on **November 21, 2026**.
+[Explore the dashboard](outputs/dashboard/ecosystem_intelligence_dashboard.html) ·
+[Read the findings](docs/ANALYTICAL_FINDINGS.md) ·
+[Inspect the run evidence](outputs/reports/latest_run_manifest.json) ·
+[View the decision mart](outputs/analytics/mart_repo_momentum.csv)
 
-| Evidence | Result |
+</div>
+
+---
+
+## The 30-second portfolio brief
+
+| | |
+| --- | --- |
+| **Business question** | Which open-source data-engineering projects are both important and actively maintained enough to justify deeper technical evaluation? |
+| **What I built** | A daily analytics platform that collects public ecosystem signals, enforces a repository-day grain, publishes tested decision marts, evaluates hypotheses, and creates a stakeholder-facing dashboard. |
+| **Verified dataset** | 50 live GitHub repositories collected November 21, 2026. |
+| **Key finding** | Top-quartile starred repositories had a **44.1 percentage-point higher** recent-maintenance rate than the remaining sample. |
+| **Reliability evidence** | Three identical local replays produced **50 → 50 → 50 rows**, zero duplicate keys, and **10/10 quality checks passed**. |
+| **Why it matters** | The project demonstrates the full analyst workflow: trustworthy data preparation, SQL modeling, validation, statistical reasoning, visualization, and a decision recommendation. |
+
+> **Headline insight:** 84.6% of top-quartile starred repositories had a commit within 30 days, compared with 40.5% of the remaining repositories—an absolute difference of **44.1 points** (Fisher odds ratio **8.07**, `p = 0.0092`).
+
+This is an observational result from a popularity-sorted search sample, not a causal claim or a representative estimate of all open-source projects.
+
+## Verified outcomes
+
+| Engineering and analytical evidence | Result |
 | --- | ---: |
-| Idempotency acceptance test | **3 replays → 50 / 50 / 50 rows** |
-| Duplicate repository/date keys | **0** |
-| Local data-quality checks | **8 / 8 passed** |
-| Automated Python tests | **9 passed** |
-| High-star repositories pushed within 30 days | **84.6%** (11/13) |
-| Other repositories pushed within 30 days | **40.5%** (15/37) |
-| Absolute maintenance-rate difference | **+44.1 percentage points** |
-| Fisher exact test | **odds ratio 8.07, p=0.0092** |
+| Live repositories in the committed snapshot | **50** |
+| Replay acceptance test | **50 / 50 / 50 rows** |
+| Duplicate `repo_id + snapshot_date` keys | **0** |
+| Local data-quality gates | **10 / 10 passed** |
+| Python unit and contract tests | **11 passed** |
+| Declared dbt data tests | **22** |
+| High-star repositories active within 30 days | **84.6%** (11/13) |
+| Remaining repositories active within 30 days | **40.5%** (15/37) |
+| Absolute rate difference | **+44.1 percentage points** |
+| Fisher exact result | **OR 8.07 · p=0.0092** |
+| Issue-count collection coverage | **50% observed; 50% preserved as null** |
 
-Top-quartile starred repositories in this selected ecosystem were substantially more likely to have a recent commit. The association is observational, not causal: repository age, organization resources, and the GitHub search selection can confound it. Wilson 95% confidence intervals and complete assumptions are in [`docs/ANALYTICAL_FINDINGS.md`](docs/ANALYTICAL_FINDINGS.md).
+### Sensitivity check
 
-The proposed star-growth/future-fork-growth hypothesis is intentionally marked **insufficient history** until at least 14 daily snapshots exist. The project does not fabricate historical measurements to force a result.
+The popularity/activity association remains positive across four precomputed maintenance windows:
+
+| Active within | High-star rate | Other rate | Difference | Fisher p-value |
+| ---: | ---: | ---: | ---: | ---: |
+| 14 days | 84.6% | 37.8% | +46.8 pts | 0.0083 |
+| 30 days | 84.6% | 40.5% | +44.1 pts | 0.0092 |
+| 60 days | 92.3% | 45.9% | +46.4 pts | 0.0037 |
+| 90 days | 92.3% | 54.1% | +38.3 pts | 0.0180 |
+
+The full analysis also reports Wilson confidence intervals and activity rates by repository-age quartile in [the analytical findings](docs/ANALYTICAL_FINDINGS.md).
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-  GH[GitHub Search API] --> AF[Airflow daily DAG]
-  HN[Hacker News API] --> AF
-  CG[CoinGecko API] --> AF
-  AF --> S3[S3 immutable date partitions]
-  S3 --> MERGE[Transactional Snowflake MERGE]
-  MERGE --> RAW[RAW snapshots + run audit]
-  RAW --> DBT[dbt typing, tests, reconciliation]
-  DBT --> FACT[fct_repo_daily]
-  FACT --> MART[mart_repo_momentum]
-  MART --> BI[Interactive dashboard / Tableau extract]
-  FACT --> HYP[Hypothesis tests + confidence intervals]
+    subgraph Sources["Live public sources"]
+        GH[GitHub Search API]
+        HN[Hacker News API]
+        CG[CoinGecko API]
+    end
+
+    subgraph Orchestration["Orchestration & landing"]
+        AF[Airflow daily DAG]
+        S3[(S3 immutable<br/>date partitions)]
+    end
+
+    subgraph Warehouse["Snowflake warehouse"]
+        MERGE[Transactional MERGE]
+        RAW[(RAW snapshots<br/>+ run audit)]
+        DBT[dbt freshness<br/>+ dependency-aware build]
+    end
+
+    subgraph Products["Governed analytics products"]
+        FACT[(fct_repo_daily)]
+        MART[(mart_repo_momentum)]
+        HYP[Hypothesis analysis]
+        DASH[Plotly dashboard<br/>+ Tableau-ready extract]
+    end
+
+    GH & HN & CG --> AF --> S3 --> MERGE --> RAW --> DBT --> FACT --> MART
+    FACT --> HYP
+    MART --> DASH
 ```
 
-### Declared grain and stable keys
+### Orchestration and failure boundary
 
-- Raw and fact grain: one `repo_id` per `snapshot_date`.
-- Stable snapshot key: SHA-256 of source/table, repository ID, and snapshot date.
-- Replays use Snowflake `MERGE`; a matching key updates the batch metadata/payload instead of inserting a duplicate.
-- All records retain `run_id`, `source_file`, `ingested_at`, and source timestamps.
-- The four-source warehouse load commits atomically and rolls back on any failure.
+```mermaid
+flowchart TD
+    A[extract_github] & B[extract_hackernews] & C[extract_coingecko] --> D[load_to_snowflake]
+    D -->|one transaction| E[dbt source freshness]
+    E -->|fresh sources| F[dbt build]
+    F --> G{All tests pass?}
+    G -->|Yes| H[Publish facts and marts]
+    G -->|No| I[Fail visibly; keep prior trusted products]
+```
 
-## Decision-support data products
+Airflow runs daily at 06:00 UTC with three retries, a 45-minute execution limit, and one active run. `dbt source freshness` precedes `dbt build`, so models and tests execute in dependency order even on a newly provisioned warehouse.
 
-| Model | Purpose |
+## Data model and lineage
+
+```mermaid
+flowchart LR
+    R1[raw_github_repos] --> S1[stg_github_repos]
+    R2[raw_hackernews_posts] --> S2[stg_hackernews_posts]
+    R3[raw_coingecko_*] --> S3[stg_coingecko_*]
+    S1 --> F[fct_repo_daily]
+    F --> M[mart_repo_momentum]
+    S1 & S2 & S3 --> C[fct_ingestion_counts]
+    F --> A[Statistical analysis]
+    M --> D[Dashboard / Tableau extract]
+```
+
+| Data product | Grain | Decision value |
+| --- | --- | --- |
+| `stg_github_repos` | Repository × snapshot date | Typed popularity, activity, issue, timestamp, and lineage fields |
+| `stg_hackernews_posts` | Story × snapshot date | Correctly named supplemental discussion signals |
+| `fct_repo_daily` | Repository × snapshot date | Maintenance recency, age, issue burden, and fork/star measures |
+| `mart_repo_momentum` | Latest repository snapshot | Evaluation score, maintenance risk, growth measures, and evidence readiness |
+| `fct_ingestion_counts` | Source | Operational reconciliation across landed sources |
+
+The evaluation score combines activity recency, star percentile, and fork percentile. It is a transparent triage policy—not a probability of software quality.
+
+## How the platform supports a decision
+
+| Signal | Interpretation | Recommended action |
+| --- | --- | --- |
+| High evaluation score + `ACTIVE` | Popular and currently maintained | Prioritize for technical evaluation |
+| High popularity + `WATCH` | Important, but maintenance may be slowing | Review releases, issue response, and roadmap before adoption |
+| `HIGH` maintenance risk | No recent default-branch activity | Require manual due diligence or identify alternatives |
+| `COLLECTING_HISTORY` | Insufficient longitudinal evidence | Do not describe current popularity as momentum |
+| Missing issue count | Collection unavailable—not a true zero | Exclude issue-burden comparisons until observed |
+
+## Data reliability by design
+
+```mermaid
+flowchart LR
+    K[Stable repository/day key] --> I[Idempotent replay]
+    I --> Q[Quality gates]
+    Q --> R[Reconciliation]
+    R --> L[Lineage + run audit]
+    L --> P[Trusted analytical products]
+```
+
+- **Stable grain:** one `repo_id` per `snapshot_date` throughout the analytical path.
+- **Replay safety:** Snowflake SQL uses deterministic keys and `MERGE`; the credential-free local acceptance path verifies three identical replays.
+- **Atomic warehouse logic:** all source merges and audit writes commit together or roll back together.
+- **Secure staging:** Snowflake uses `STORAGE_INTEGRATION`; AWS secrets are not interpolated into SQL.
+- **Visible invalid data:** negative counts, malformed timestamps, duplicate keys, stale sources, and reconciliation gaps fail tests.
+- **Missing ≠ zero:** unavailable issue counts remain null with an explicit collection status. In the evidence snapshot, 25 counts were observed and 25 remained null.
+- **Traceability:** records retain `run_id`, `source_file`, `ingested_at`, source timestamps, schema version, and a source SHA-256 fingerprint.
+
+## Statistical reasoning—not just a dashboard
+
+### Hypothesis A: popularity and recent maintenance
+
+`H₁`: Top-quartile starred repositories have a higher proportion of pushes within 30 days than the remaining selected repositories.
+
+The analysis reports sample sizes, group rates, Wilson 95% confidence intervals, absolute effect size, Fisher's exact odds ratio and p-value, activity-window sensitivity, age-group context, and non-causal limitations.
+
+### Hypothesis B: star growth and subsequent fork growth
+
+This test requires non-overlapping longitudinal windows. The platform calculates daily deltas and exposes `growth_evidence_status`, but the test is deliberately marked **INSUFFICIENT_HISTORY** until at least 14 daily snapshots exist. No synthetic history is created to force an attractive conclusion.
+
+## Dashboard and stakeholder outputs
+
+The repository contains an interactive **Plotly** dashboard with two views:
+
+1. **Data Reliability** — current rows, validation status, replay variance, and duplicate keys.
+2. **Ecosystem Analytics** — popularity versus maintenance recency with repository-level drill-down.
+
+It also publishes a [Tableau-ready CSV extract](outputs/analytics/tableau_repo_momentum_extract.csv). A native Tableau workbook is a planned presentation layer and is not claimed as completed.
+
+| Reviewer artifact | What it proves |
 | --- | --- |
-| `stg_github_repos` | Typed repository identity, popularity, issue, timestamp, and lineage fields |
-| `stg_hackernews_posts` | Correctly named typed community stories (replaces misleading Reddit naming) |
-| `fct_repo_daily` | One repository/day with maintenance recency, age, issue burden, and fork/star ratio |
-| `mart_repo_momentum` | Current evaluation ranking, growth measures, maintenance risk, and evidence readiness |
-| `fct_ingestion_counts` | Operational source volume reconciliation |
+| [Interactive dashboard](outputs/dashboard/ecosystem_intelligence_dashboard.html) | Stakeholder-facing exploration |
+| [Decision mart](outputs/analytics/mart_repo_momentum.csv) | Ranked repository-level analytical output |
+| [Hypothesis results](outputs/reports/hypothesis_results.json) | Effect sizes, uncertainty, sensitivity, and readiness gate |
+| [Data-quality results](outputs/reports/data_quality_results.csv) | Rule-by-rule validation evidence |
+| [Latest run manifest](outputs/reports/latest_run_manifest.json) | Source fingerprint, duration, counts, replays, and outcomes |
+| [Metric dictionary](docs/METRIC_DICTIONARY.md) | Business definitions and limitations |
+| [Operations runbook](docs/OPERATIONS_RUNBOOK.md) | Failure, recovery, replay, and backfill procedures |
 
-The ranking combines observable activity recency, star percentile, and fork percentile. It is a transparent triage aid—not a claim of repository quality.
+## Evidence boundary
 
-## Reliability and security upgrades
+This table makes the project's proof level explicit:
 
-- Daily Airflow schedule at 06:00 UTC, three retries, bounded execution time, and one active run.
-- GitHub API extraction with retryable transient failures, stable run metadata, and schema versioning.
-- Credential-free Snowflake external stage using `STORAGE_INTEGRATION`; no AWS secret is interpolated into SQL.
-- Transactional, replay-safe `MERGE` for every raw source plus `PIPELINE_RUN_AUDIT`.
-- Eight dbt schema tests, three singular business-rule/reconciliation tests, and source freshness thresholds.
-- CI linting, mocked transformation/idempotency tests, loader security tests, and committed-evidence release gates.
-- Visible failures: malformed timestamps, negative metrics, key duplication, reconciliation gaps, and stale sources fail checks instead of being silently skipped.
+| Capability | Status | Evidence |
+| --- | --- | --- |
+| Live public GitHub collection | **Verified locally** | Committed raw snapshot and SHA-256 manifest |
+| Three replay idempotency test | **Verified locally** | 50/50/50 counts and zero duplicate keys |
+| Python contracts and analytics | **Verified in CI** | 11 automated tests and release gates |
+| dbt project structure | **Parsed and tested statically** | 7 models and 22 declared data tests |
+| Snowflake transactional merge | **Implemented and unit-tested** | SQL construction/security tests; live replay proof still pending |
+| Native Tableau workbook | **Not yet implemented** | Plotly dashboard and Tableau-ready extract are available |
 
-## Statistical analysis
+## Technology choices
 
-### Hypothesis A — popularity and recent maintenance
+| Layer | Technology | Why it is used |
+| --- | --- | --- |
+| Source collection | Python, GitHub REST, Hacker News, CoinGecko | Real public data and explicit failure handling |
+| Orchestration | Apache Airflow | Scheduling, parallel extraction, retries, dependency control |
+| Raw landing | AWS S3 | Immutable date partitions and replayable source evidence |
+| Warehouse | Snowflake | Transactional merge, semi-structured ingestion, governed analytics |
+| Transformation | dbt + SQL | Typed models, lineage, freshness, tests, incremental facts |
+| Analysis | pandas + SciPy | Reproducible effect sizes, intervals, and hypothesis tests |
+| Visualization | Plotly + Tableau-ready CSV | Interactive review now; portable BI handoff |
+| Delivery | GitHub Actions | Lint, tests, dbt parse, and evidence release gates |
 
-`H₁`: top-quartile starred repositories have a higher proportion of pushes within 30 days than the remaining repositories.
+## Reproduce the verified evidence
 
-The analysis reports group sample sizes, rates, Wilson confidence intervals, the absolute effect size, Fisher's exact odds ratio and p-value, and an explicit non-causal limitation statement. The raw and curated records are committed so the result can be recalculated independently.
-
-### Hypothesis B — star growth and subsequent fork growth
-
-This requires non-overlapping longitudinal windows. The pipeline calculates daily star/fork deltas, counts repository history, and exposes `growth_evidence_status`. Formal testing remains blocked until 14 snapshots exist. This is a deliberate analytical guardrail.
-
-## Run the verified local path
-
-The local path requires no AWS or Snowflake account. It collects a bounded public GitHub snapshot, replays the batch three times, validates it, creates Parquet/CSV analytics products, runs both hypothesis gates, and builds the dashboard.
+The reviewer path requires no AWS or Snowflake credentials:
 
 ```bash
+git clone https://github.com/tmushd/dev-ecosystem-pipeline.git
+cd dev-ecosystem-pipeline
 python3 -m pip install -r requirements-dev.txt
 make verify
 ```
 
-Key artifacts:
+`make verify` runs Python tests, linting, dbt parsing, a bounded live GitHub evidence build, and release assertions.
 
-- [`outputs/reports/latest_run_manifest.json`](outputs/reports/latest_run_manifest.json) — replay counts, DQ status, and analytical result
-- [`outputs/reports/data_quality_results.csv`](outputs/reports/data_quality_results.csv) — rule-by-rule validation evidence
-- [`outputs/reports/hypothesis_results.json`](outputs/reports/hypothesis_results.json) — effect sizes, intervals, tests, and readiness
-- [`outputs/analytics/mart_repo_momentum.csv`](outputs/analytics/mart_repo_momentum.csv) — ranked decision-support mart
-- [`outputs/analytics/tableau_repo_momentum_extract.csv`](outputs/analytics/tableau_repo_momentum_extract.csv) — Tableau-ready extract
-- [Interactive ecosystem dashboard](outputs/dashboard/ecosystem_intelligence_dashboard.html)
+<details>
+<summary><strong>Run the cloud pipeline</strong></summary>
 
-The production extractor uses the GitHub REST API and `GITHUB_TOKEN`. The bounded evidence builder uses public GitHub pages only when unauthenticated API quota is unavailable, preserving a credential-free reviewer experience.
+1. Configure `.env` from `.env.example`.
+2. Create `dbt_project/profiles.yml` from the example.
+3. Provision the least-privilege Snowflake role and storage integration using [`docs/SNOWFLAKE_SETUP.sql`](docs/SNOWFLAKE_SETUP.sql).
+4. Start Airflow with `docker compose up -d --build`.
+5. Enable or manually trigger `dev_ecosystem_elt`.
+6. Query `ANALYTICS.MART_REPO_MOMENTUM` after `dbt build` succeeds.
 
-## Run the cloud pipeline
+</details>
 
-1. Configure `.env` from `.env.example` and create `dbt_project/profiles.yml` from the example.
-2. Create the Snowflake storage integration and stage using [`docs/SNOWFLAKE_SETUP.sql`](docs/SNOWFLAKE_SETUP.sql).
-3. Start Airflow: `docker compose up -d --build`.
-4. Enable `dev_ecosystem_elt`; it is scheduled daily and can also be triggered manually.
-5. Run `dbt source freshness`, `dbt build`, and query `ANALYTICS.MART_REPO_MOMENTUM`.
-
-## Repository map
+## Repository guide
 
 ```text
-├── analytics/                         # normalization, DQ, marts, hypotheses, public evidence collector
+├── analytics/                         # normalization, DQ, marts, hypotheses, public evidence
 ├── dags/
-│   ├── ecosystem_elt_dag.py           # scheduled/retried orchestration
+│   ├── ecosystem_elt_dag.py           # scheduled orchestration and dependency order
 │   └── extractors/                    # GitHub, Hacker News, CoinGecko, S3
 ├── dbt_project/
 │   ├── models/staging/                # typed, lineage-preserving source models
-│   ├── models/marts/                  # daily fact and evaluation mart
-│   └── tests/                         # business rules and reconciliation
+│   ├── models/marts/                  # repository-day fact and evaluation mart
+│   └── tests/                         # business rules and count reconciliation
 ├── scripts/load_to_snowflake.py       # atomic integration-backed MERGE loader
-├── scripts/build_portfolio_evidence.py# credential-free reproducible analytical evidence
-├── tests/                              # clean/corrupt fixtures, replay, security, statistics
-├── outputs/                            # committed recruiter-verifiable evidence
-└── docs/                               # architecture, findings, metric dictionary, operations
+├── scripts/build_portfolio_evidence.py# credential-free reproducible evidence
+├── tests/                              # clean/corrupt fixtures, replay, DAG, security, statistics
+├── outputs/                            # committed recruiter-verifiable results
+└── docs/                               # findings, architecture, metrics, and operations
 ```
 
-## Defensible resume bullets
+## Resume-ready impact
 
-- Engineered a daily analytics pipeline across Airflow, S3, Snowflake, and dbt with transactional `MERGE` loading; demonstrated replay safety across three identical runs with zero duplicate repository/date keys and 8/8 local quality checks passing.
-- Built typed repository-day facts, a decision-support ranking, and reproducible hypothesis analysis over 50 live open-source projects; found a 44.1-point difference in recent-maintenance rates for top-quartile starred repositories (Fisher p=0.0092), with confidence intervals and non-causal limitations reported.
+- Engineered a daily analytics platform across Airflow, S3, Snowflake, and dbt with transactional `MERGE` loading, dependency-aware builds, 22 warehouse tests, and replay-safe repository/day modeling; verified three identical local replays with zero duplicate keys and 10/10 quality gates passing.
+- Analyzed 50 live open-source repositories using effect sizes, Wilson intervals, Fisher's exact testing, activity-window sensitivity, and age context; identified a **44.1-point difference** in recent-maintenance rates for top-quartile starred projects (`p=0.0092`) and translated the result into a technical-evaluation workflow.
 
-These bullets describe committed, inspectable evidence. They do not claim unmeasured revenue, time savings, or causal impact.
+These claims are tied to committed artifacts and deliberately exclude unmeasured revenue, time savings, causal impact, live Snowflake replay proof, or a native Tableau workbook.

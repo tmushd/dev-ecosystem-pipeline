@@ -31,14 +31,14 @@
 - **S3 object**: A file stored in S3 (data + metadata).
 - **S3 key**: The full path/name of an object inside a bucket (example: `raw/github/2026-04-02/repos.json`).
 - **Prefix**: A "folder-like" part of the key; S3 doesn't have real folders, just key prefixes.
-- **IAM user**: An identity with access keys; used here to give the pipeline permission to write to S3.
+- **IAM role / storage integration**: The credential-free trust path used by Snowflake to read the allowed S3 prefix.
 
 ## Snowflake Terms
 
 - **Warehouse**: Snowflake compute resources; you pay while it runs queries.
 - **Database / Schema**: Namespaces for tables (we used `DEV_ECOSYSTEM.RAW` and `DEV_ECOSYSTEM.ANALYTICS`).
 - **Stage**: A Snowflake object that points to external files (S3) so Snowflake can load them.
-- **`COPY INTO`**: Snowflake command to load data from files into a table.
+- **`MERGE`**: Snowflake command that updates a matching key or inserts a new one, used here for replay-safe snapshots.
 - **`VARIANT`**: Snowflake data type for semi-structured data (JSON).
 - **`METADATA$FILENAME`**: A Snowflake pseudo-column that returns the source file path during loading.
 
@@ -48,4 +48,5 @@
 - **Source**: A "raw table" input declared in YAML (so models can reference it safely).
 - **`ref()`**: dbt function to reference another model (builds the dependency graph).
 - **Materialization**: What dbt builds (`view`, `table`, `incremental`, etc.).
+- **`dbt build`**: Runs models and tests in dependency order.
 

@@ -77,3 +77,12 @@ def test_missing_required_id_raises_during_normalization() -> None:
     del repo["id"]
     with pytest.raises(KeyError):
         normalize_repository(repo, snapshot_date="2026-11-21", run_id="test", source_file="fixture.json")
+
+
+def test_missing_issue_count_is_not_converted_to_zero() -> None:
+    repo = _repo(1)
+    repo["open_issues_count"] = None
+    repo["open_issues_collection_status"] = "http_503"
+    normalized = normalize_repository(repo, snapshot_date="2026-11-21", run_id="test", source_file="fixture.json")
+    assert normalized["open_issues"] is None
+    assert normalized["open_issues_collection_status"] == "http_503"

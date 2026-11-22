@@ -1,34 +1,45 @@
-# Demo Script (60 to 90 seconds)
+# Recruiter demo script (90 seconds)
 
-If a recruiter asks "what did you build?", this is a simple walkthrough.
+## 1. Lead with the decision
 
-## 1) One sentence
+“I built an analytics platform that helps a technology-evaluation team prioritize open-source data-engineering repositories using popularity, maintenance recency, and longitudinal readiness.”
 
-I built an end-to-end ELT pipeline that extracts live API data, lands raw JSON in S3 by run date, loads it into Snowflake with `COPY INTO`, and uses dbt to model an analytics-ready table, all orchestrated by Airflow.
+## 2. Show the architecture
 
-## 2) Show the orchestration
+Open the README diagram and explain:
 
-- Open Airflow -> DAG `dev_ecosystem_elt`
-- Point out parallel tasks (GitHub, CoinGecko, Hacker News) -> single load -> dbt
+- Airflow schedules parallel API extraction.
+- S3 preserves replayable date partitions.
+- Snowflake merges deterministic repository/date snapshots atomically.
+- dbt freshness and `dbt build` publish tested facts and marts.
+- Python/SciPy and Plotly turn the facts into evidence and a decision interface.
 
-## 3) Show the data lake landing zone
+## 3. Show reliability evidence
 
-- Open S3 -> show date-partitioned objects under `raw/<source>/YYYY-MM-DD/`
+Open `outputs/reports/latest_run_manifest.json`:
 
-## 4) Show the warehouse + transformations
+- 50 live repositories.
+- Three replays: 50, 50, 50.
+- Zero duplicates.
+- 10/10 quality gates.
+- Source SHA-256 and run metadata.
 
-In Snowflake:
+Point out that unavailable issue counts remain null, not zero.
 
-```sql
-select * from dev_ecosystem.analytics.fct_ingestion_counts order by source_name;
-```
+## 4. Show the analytical finding
 
-Explain:
+Open `docs/ANALYTICAL_FINDINGS.md`:
 
-- RAW tables store JSON in `VARIANT` plus `source_file` for lineage
-- dbt creates staging views + a mart table
+- Top-star group recent-maintenance rate: 84.6%.
+- Remaining group: 40.5%.
+- Difference: 44.1 points.
+- Fisher p-value: 0.0092.
+- The direction remains positive across 14-, 30-, 60-, and 90-day definitions.
 
-## 5) One "production" note
+State that the sample is selected and observational, so the result supports prioritization—not causality.
 
-This pipeline uses a realistic ingestion pattern: object storage landing -> warehouse `COPY INTO` instead of loading from local files.
+## 5. Close with the decision output
 
+Open the dashboard or `mart_repo_momentum.csv` and explain how `ACTIVE`, `WATCH`, `HIGH`, and `COLLECTING_HISTORY` change the next action for an evaluator.
+
+Finish with: “The strongest part of this project is that every headline claim links to a committed artifact, and the README clearly distinguishes local proof from cloud-ready implementation.”
